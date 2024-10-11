@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta name="description" content="获取v2ray, clash, singbox免费订阅链接，关注微信公众号，获取验证码以访问独家内容。">
+    <meta name="keywords" content="v2ray, clash, singbox, 免费订阅, 仙葫说, 免费网络服务, 代理服务, 订阅服务">
+    <meta name="robots" content="index, follow">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>免费订阅分享</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 660px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            background-color:aliceblue;
+            height: 100vh;
+        }
+        .image-row {
+            margin-top: 40px;
+        }
+        .button {
+            display: inline-block;
+            width: 90%;
+            max-width: 300px;
+            margin: 20px auto;
+            padding: 15px;
+            background-color: #07c160;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .select-container {
+            margin: 20px 0;
+        }
+        select {
+            width: 90%;
+            max-width: 300px;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background: white;
+        }
+        .modal-content {
+            margin-top: 20px;
+            padding: 20px;
+        }
+        .modal-content p {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .modal-content input {
+            padding: 10px;
+            font-size: 16px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .error-message {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="image-row">
+            <h1>v2ray，clash，singbox免费订阅</h1>
+        </div>
+        <div class="select-container">
+            <select id="subscriptionType">
+                <option value="" disabled selected>选择订阅类型</option>
+                <option value="v2ray">v2ray</option>
+                <option value="clash">clash</option>
+                <option value="singbox">singbox</option>
+            </select>
+        </div>
+        <div class="modal-content">
+            <p>关注微信公众号"仙葫说"，发送【验证码】获取，在下方输入验证码</p>
+            <img src="https://p3-sign.toutiaoimg.com/tos-cn-i-eyfl5e3fp8/952e5ab6be854d72b2dd0ff9d32a8f9c~tplv-obj.image?lk3s=993df49e&traceid=2024092419133443766AC806B66E768389&x-expires=2147483647&x-signature=O1iTMTlGWxfoo0A%2Fo%2B4NycVZbwE%3D" alt="描述信息" style="max-width: 100%; height: auto; margin: 10px 0;">
+            <input type="text" id="secretCode" placeholder="请输入6位验证码" autocomplete="off">
+            <div id="error-message" class="error-message"></div>
+        </div>
+        <a href="#" class="button" id="getLinkButton" onclick="handleLink()">获取链接</a>
+        <div id="subscription"></div>
+        <a href="#" class="button" id="copyButton" onclick="copyToClipboard()" style="display:none;">复制到剪贴板</a>
+    </div>
+    <script>
+        function handleLink() {
+            const select = document.getElementById('subscriptionType');
+            const selectedType = select.value;
+            const secretCode = document.getElementById('secretCode').value;
+            const errorMessage = document.getElementById('error-message');
+            const getLinkButton = document.getElementById('getLinkButton');
+            const copyButton = document.getElementById('copyButton');
+            const subscriptionDiv = document.getElementById("subscription");
+
+            // 清空错误信息
+            errorMessage.textContent = '';
+
+            // 验证订阅类型是否被选择
+            if (!selectedType) {
+                errorMessage.textContent = '请选择订阅类型';
+                return;
+            }
+
+            // 验证验证码是否输入且为6位
+            if (!secretCode || secretCode.length !== 6) {
+                errorMessage.textContent = '请输入有效的6位验证码';
+                return;
+            }
+
+            // 构建请求链接
+            const link = `https://api.nicevoice.nyc.mn/g1?t=${selectedType}&code=${secretCode}`;
+
+            // 禁用按钮以防止重复请求
+            getLinkButton.disabled = true;
+
+            // 发送请求
+            fetch(link)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('网络响应不正常');
+                    }
+                    return response.json(); // 解析 JSON 响应
+                })
+                .then(data => {
+                    console.log('接口返回的数据:', data);
+                    if (data['code'] === 200) {
+                        subscriptionDiv.textContent = data['data'];
+                        copyButton.style.display = 'inline-block'; // 显示复制按钮
+                    } else {
+                        errorMessage.textContent = data['message'];
+                    }
+                })
+                .catch(error => {
+                    console.error('请求失败:', error);
+                    errorMessage.textContent = '请求失败，请稍后重试';
+                })
+                .finally(() => {
+                    // 恢复按钮状态
+                    getLinkButton.disabled = false;
+                });
+
+            const encodedLink = window.btoa(link);
+            console.log('Encoded Link:', encodedLink);
+        }
+
+        function copyToClipboard() {
+            const subscriptionDiv = document.getElementById("subscription");
+            const textToCopy = subscriptionDiv.textContent;
+
+            if (textToCopy) {
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    alert("链接已复制到剪贴板！");
+                }).catch(err => {
+                    console.error('复制失败:', err);
+                });
+            } else {
+                alert("没有可复制的链接。");
+            }
+        }
+    </script>
+</body>
+</html>
